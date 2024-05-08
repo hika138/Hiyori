@@ -42,7 +42,7 @@ def get_weather(pref_code: int, area_code: int):
     return weather
 
 # 毎日6時に天気予報を通知する
-@tasks.loop(seconds=30)
+@tasks.loop(seconds=60)
 async def loop():
     now = datetime.now().strftime('%H:%M')
     if now == '06:00':
