@@ -38,7 +38,7 @@ def get_weather(pref_code: int, area_code: int):
     weather_json = requests.get(weather_url).json()
     for weather_area in weather_json[0]["timeSeries"][0]["areas"]:
         if int(weather_area["area"]["code"]) == area_code:
-                weather = str(weather_area["weathers"][1]).replace("\u3000", "")
+                weather = str(weather_area["weathers"][0]).replace("\u3000", "")
     return weather
 
 # 毎日6時に天気予報を通知する
