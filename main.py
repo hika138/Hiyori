@@ -44,18 +44,18 @@ def get_weather(pref_code: int, area_code: int):
 
 # 天気予報を通知する関数
 async def weather_notify():
-    now = datetime.now().strftime('%H:%M')
-    if now == '06:00':
-        channel = client.get_channel(channel_id)
-        tokushima_weather = get_weather(tokushima_code, tokushima_north_code)
-        hyogo_weather = get_weather(hyogo_code, hyogo_south_code)
-        send_message = f"# {datetime.now().strftime('%Y/%m/%d')}\n## 徳島北部の天気\n> ## {tokushima_weather}\n## 兵庫南部の天気\n> ## {hyogo_weather}"
-        await channel.send(send_message)
+    channel = client.get_channel(channel_id)
+    tokushima_weather = get_weather(tokushima_code, tokushima_north_code)
+    hyogo_weather = get_weather(hyogo_code, hyogo_south_code)
+    send_message = f"# {datetime.now().strftime('%Y/%m/%d')}\n## 徳島北部の天気\n> ## {tokushima_weather}\n## 兵庫南部の天気\n> ## {hyogo_weather}"
+    await channel.send(send_message)
 
 
 # 毎日6時に天気予報を通知する
 @tasks.loop(seconds=60)
 async def loop():
-    await weather_notify()
+    now = datetime.now().strftime('%H:%M')
+    if now == '06:00':
+        await weather_notify()
 
 client.run(token)
