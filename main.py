@@ -30,6 +30,7 @@ hyogo_south_code = 280010
 @client.event
 async def on_ready():
     loop.start()
+    await weather_notify()
     print("Get on ready!")
 
 # 天気予報を取得する関数
@@ -41,8 +42,7 @@ def get_weather(pref_code: int, area_code: int):
                 weather = str(weather_area["weathers"][0]).replace("\u3000", "")
     return weather
 
-# 毎日6時に天気予報を通知する
-@tasks.loop(seconds=60)
+# 天気予報を通知する関数
 async def weather_notify():
     now = datetime.now().strftime('%H:%M')
     if now == '06:00':
@@ -51,5 +51,11 @@ async def weather_notify():
         hyogo_weather = get_weather(hyogo_code, hyogo_south_code)
         send_message = f"# {datetime.now().strftime('%Y/%m/%d')}\n## 徳島北部の天気\n> ## {tokushima_weather}\n## 兵庫南部の天気\n> ## {hyogo_weather}"
         await channel.send(send_message)
+
+
+# 毎日6時に天気予報を通知する
+@tasks.loop(seconds=60)
+async def loop():
+    await weather_notify()
 
 client.run(token)
