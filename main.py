@@ -43,7 +43,7 @@ def get_weather(pref_code: int, area_code: int):
 
 # 毎日6時に天気予報を通知する
 @tasks.loop(seconds=60)
-async def loop():
+async def weather_notify():
     now = datetime.now().strftime('%H:%M')
     if now == '06:00':
         channel = client.get_channel(channel_id)
