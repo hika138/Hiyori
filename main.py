@@ -10,7 +10,6 @@ import requests
 import json
 
 from datetime import datetime
-import gc
 
 # .envファイルを読み込む
 dotenv_path = join(dirname(__file__), '.env')
