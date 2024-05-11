@@ -1,14 +1,9 @@
 import discord
 from discord.ext import tasks
-
-import sys
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-
-import requests
-import json
-
+import requests 
 from datetime import datetime
 
 # .envファイルを読み込む
@@ -36,7 +31,7 @@ kobe_city_code = 63518
 @client.event
 async def on_ready():
     loop.start()
-    # await weather_notify(1)
+    await weather_notify(1)
     print("Get on ready!")
 
 # 天気予報を取得する関数
