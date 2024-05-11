@@ -31,7 +31,7 @@ kobe_city_code = 63518
 @client.event
 async def on_ready():
     loop.start()
-    await weather_notify(1)
+    # await weather_notify(1)
     print("Get on ready!")
 
 # 天気予報を取得する関数
