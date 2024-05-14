@@ -5,6 +5,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 import requests 
 from datetime import datetime
+import gc
 
 # .envファイルを読み込む
 dotenv_path = join(dirname(__file__), '.env')
@@ -51,11 +52,11 @@ def get_weather(pref_code: int, area_code: int, local_code: int, day: int = 0):
     # 該当地域の日中予想降水確率を取得
     for pops_area in weather_json[0]["timeSeries"][1]["areas"]:
         if int(pops_area["area"]["code"]) == area_code:
-            if day == 0:
+            if day == 0:    # 当日の降水確率の平均値
                 pops = {pops_area["pops"][0], pops_area["pops"][1], pops_area["pops"][2]}
-            elif day == 1:
+            elif day == 1:  # 翌日の降水確率の平均値
                 pops = {pops_area["pops"][2], pops_area["pops"][3], pops_area["pops"][4]}
-            else:
+            else:           # それ以外を指定した場合は当日の降水確率の平均値
                 pops = {pops_area["pops"][0], pops_area["pops"][1], pops_area["pops"][2]}
             pop_sum = 0
             for pop in pops:
@@ -70,6 +71,7 @@ async def weather_notify(day: int = 0):
     channel = client.get_channel(channel_id)
     tokushima_weather, tokushima_temp, tokushima_pop = get_weather(tokushima_code, tokushima_north_code, tokushima_city_code,day)
     hyogo_weather, hyogo_temp, hyogo_pop = get_weather(hyogo_code, hyogo_south_code, kobe_city_code, day)
+    
     # 天気予報を埋め込みメッセージで通知
     embed = discord.Embed()
     if day == 0:
@@ -89,15 +91,18 @@ async def weather_notify(day: int = 0):
                     value=f"> 天気予報: {hyogo_weather}\n> 最高気温: {hyogo_temp} ℃\n> 降水確率: {hyogo_pop} %",
                     inline=True)
     await channel.send(embed=embed)
+    
+    # 返り値以外の変数を削除
     del tokushima_weather, tokushima_temp, tokushima_pop, hyogo_weather, hyogo_temp, hyogo_pop
 
 
 # 毎日6時に天気予報を通知する
 @tasks.loop(seconds=60)
 async def loop():
-    if datetime.now().strftime('%H:%M') == '06:00':
+    now = datetime.now().strftime('%H:%M')
+    if now == '06:00':
         await weather_notify(0)
-    elif datetime.now().strftime('%H:%M') == '18:00':
+    elif now == '18:00':
         await weather_notify(1)
-
+    gc.collect()
 client.run(token)
