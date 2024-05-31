@@ -100,7 +100,7 @@ async def weather_notify(tokushima:Area, hyogo:Area, day: int = 0):
 @client.event
 async def on_ready():
     loop.start()
-    await weather_notify(tokushima, hyogo, 0)
+    # await weather_notify(tokushima, hyogo, 0)
     print("Get on ready!")
 
 # 毎日6時に天気予報を通知する
