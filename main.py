@@ -3,7 +3,7 @@ from discord.ext import tasks
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-import requests 
+import aiohttp
 from datetime import datetime
 
 # .envファイルを読み込む
@@ -41,13 +41,15 @@ class Area:
         self.pop = 0
 
     # 天気予報を取得するメソッド
-    def update_weather(self, day:int=0):
-        weather_json = requests.get(f'http://www.jma.go.jp/bosai/forecast/data/forecast/{str(self.pref_code)}.json').json()
-
+    async def update_weather(self, day:int=0):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'http://www.jma.go.jp/bosai/forecast/data/forecast/{str(self.pref_code)}.json') as response:
+                weather_json = await response.json()
+        
         # 該当地域の天気予報を取得
         for weather_area in weather_json[0]["timeSeries"][0]["areas"]:
             if int(weather_area["area"]["code"]) == self.area_code:
-                    self.weather = str(weather_area["weathers"][day]).replace("\u3000", "")
+                self.weather = str(weather_area["weathers"][day]).replace("\u3000", "")
         # 該当地域の予想最高気温を取得
         for temp_area in weather_json[0]["timeSeries"][2]["areas"]:
             if int(temp_area["area"]["code"]) == self.local_code:
@@ -100,7 +102,6 @@ async def weather_notify(tokushima:Area, hyogo:Area, day: int = 0):
 @client.event
 async def on_ready():
     loop.start()
-    # await weather_notify(tokushima, hyogo, 0)
     print("Get on ready!")
 
 # 毎日6時に天気予報を通知する
