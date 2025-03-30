@@ -34,7 +34,7 @@ async def on_ready():
     print("Get on Ready!")
 
 # 天気予報を通知する関数
-async def forecast_notify(channel: discord.TextChannel, areas: list[Area], day: Literal["今日", "明日"]):
+async def forecast_notify(channel: discord.TextChannel, areas, day: Literal["今日", "明日"]):
     embed = discord.Embed(title=f"{day}の天気予報",
                           url="https://www.jma.go.jp/bosai/#pattern=forecast",
                           colour=0x00b0f4,
