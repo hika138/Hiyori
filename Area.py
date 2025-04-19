@@ -38,9 +38,11 @@ class Area:
                 self.weather = str(weather_area["weathers"][day_num]).replace("\u3000", "")
                 
         # 該当地域の予想最高低気温を取得
-        for temp_area in forecast_json[0]["timeSeries"][2]["areas"]:
-            if int(temp_area["area"]["code"]) == self.local_code:
-                self.temp_max = temp_area["temps"][day_num]
+        for temp_area in forecast_json[1]["tempAverage"]["areas"]:
+            if int(temp_area[0]["area"]["code"]) == self.area_code:
+                # 当日の最高気温と最低気温を取得
+                self.temp_max = int(temp_area["temps"][0])
+                self.temp_min = int(temp_area["temps"][1])
 
         # 該当地域の日中予想降水確率を取得
         for pops_area in forecast_json[0]["timeSeries"][1]["areas"]:
