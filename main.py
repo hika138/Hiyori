@@ -5,6 +5,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 import datetime
 from typing import Literal
+from typing import Optional
 from Area import Area  # Areaクラスをインポート
 
 # .envファイルを読み込む
@@ -12,9 +13,14 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 # 環境変数を取得
-channel_id = int(os.getenv('CHANNEL_ID'))
-notify_channel: discord.TextChannel = None
+channel_id_str = os.getenv('CHANNEL_ID')
+if channel_id_str is None:
+    raise ValueError("CHANNEL_ID environment variable is not set.")
+channel_id = int(channel_id_str)
+notify_channel: Optional[discord.TextChannel] = None
 token = os.getenv('TOKEN')
+if token is None:
+    raise ValueError("TOKEN environment variable is not set.")
 
 # Discordのクライアントを作成
 intent = discord.Intents.default()
@@ -28,7 +34,11 @@ hyogo: Area = Area(280000, 280010, 63518)
 @client.event
 async def on_ready():
     global notify_channel
-    notify_channel = client.get_channel(channel_id)
+    channel = client.get_channel(channel_id)
+    if isinstance(channel, discord.TextChannel):
+        notify_channel = channel
+    else:
+        notify_channel = None
     today_forecast.start()
     tomorrow_forecast.start()
     print("Get on Ready!")
@@ -59,11 +69,12 @@ async def forecast_notify(channel: discord.TextChannel, areas, day: Literal["今
 # 毎日6時に今日の天気予報を通知する
 @tasks.loop(time=datetime.time(hour=6, minute=0, second=0, tzinfo=datetime.timezone(datetime.timedelta(hours=+9), 'JST')))
 async def today_forecast():
-    await forecast_notify(notify_channel, [tokushima, hyogo], "今日")
+    if notify_channel is not None:
+        await forecast_notify(notify_channel, [tokushima, hyogo], "今日")
 
-# 毎日18時に明日の天気予報を通知する
 @tasks.loop(time=datetime.time(hour=18, minute=0, second=0, tzinfo=datetime.timezone(datetime.timedelta(hours=+9), 'JST')))
 async def tomorrow_forecast():
-    await forecast_notify(notify_channel, [tokushima, hyogo], "明日")
+    if notify_channel is not None:
+        await forecast_notify(notify_channel, [tokushima, hyogo], "明日")
     
 client.run(token)
