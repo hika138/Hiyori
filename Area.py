@@ -39,8 +39,7 @@ class Area:
                 self.weather = str(weather_area["weathers"][day_num]).replace("\u3000", "")
                 
         # 該当地域の予想最高低気温を取得
-        for temp_area in forecast_json[1]["timeSeries"][2]["areas"]:
-            print(temp_area)
+        for temp_area in forecast_json[0]["timeSeries"][2]["areas"]:
             if int(temp_area["area"]["code"]) == self.local_code:
                 # 当日の最高気温と最低気温を取得
                 self.temp_min = float(temp_area["temps"][0])
