@@ -42,8 +42,8 @@ class Area:
         for temp_area in forecast_json[1]["tempAverage"]["areas"]:
             if int(temp_area[0]["area"]["code"]) == self.area_code:
                 # 当日の最高気温と最低気温を取得
-                self.temp_max = int(temp_area["temps"][0])
-                self.temp_min = int(temp_area["temps"][1])
+                self.temp_max = int(temp_area["temps"][0]["max"])
+                self.temp_min = int(temp_area["temps"][1]["min"])
 
         # 該当地域の日中予想降水確率を取得
         pops = set()  # popsを初期化
