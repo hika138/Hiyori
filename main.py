@@ -19,6 +19,8 @@ if channel_id_str is None:
 channel_id = int(channel_id_str)
 notify_channel: Optional[discord.TextChannel] = None
 token = os.getenv('TOKEN')
+if token is None:
+    raise ValueError("TOKEN environment variable is not set.")
 
 # Discordのクライアントを作成
 intent = discord.Intents.default()
