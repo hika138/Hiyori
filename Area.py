@@ -20,7 +20,8 @@ class Area:
         # 該当市町村を取得
         for local_area in forecast_json[0]["timeSeries"][2]["areas"]:
             if int(local_area["area"]["code"]) == self.local_code:
-                return str(local_area["area"]["name"])    
+                return str(local_area["area"]["name"])
+        return ""  # 該当市町村が見つからない場合は空文字列を返す
 
     # 天気予報を取得するメソッド
     async def get_forecast(self, day:Literal["今日", "明日"]):
@@ -45,6 +46,7 @@ class Area:
                 self.temp_min = int(temp_area["temps"][1])
 
         # 該当地域の日中予想降水確率を取得
+        pops = set()  # popsを初期化
         for pops_area in forecast_json[0]["timeSeries"][1]["areas"]:
             if int(pops_area["area"]["code"]) == self.area_code:
                 if day == "今日":
@@ -57,4 +59,4 @@ class Area:
         for pop in pops:
             pop_sum += int(pop)
         # 降水確率の平均値を取得
-        self.pop = round(pop_sum / len(pops), 1)
+        self.pop = round(pop_sum / len(pops), 1) if pops else 0  # popsが空の場合は0
