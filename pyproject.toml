@@ -8,4 +8,5 @@ dependencies = [
     "discord",
     "python-dotenv",
     "openmeteo-requests",
+    "numpy",
 ]
