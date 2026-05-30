@@ -51,7 +51,7 @@ class WeatherCog(commands.Cog):
 
     async def forecast_notify(self, channel: discord.TextChannel, day: datetime.datetime):
         embed = discord.Embed(
-            title=f"{day.strftime('%m-%d')}の天気予報",
+            title=f"{day.strftime('%m/%d')}の天気予報",
             url="https://www.jma.go.jp/bosai/#pattern=forecast",
             colour=0x00B0F4,
             timestamp=datetime.datetime.now(),
@@ -75,7 +75,7 @@ class WeatherCog(commands.Cog):
                 inline=True,
             )
         
-        embed.set_footer(text=f"{datetime.datetime.now().strftime('%m-%d %H:%M')}時点")
+        embed.set_footer(text=f"{datetime.datetime.now().strftime('%m/%d %H:%M')}時点")
         await channel.send(embed=embed)
 
     @tasks.loop(
