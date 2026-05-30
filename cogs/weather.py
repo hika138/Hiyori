@@ -1,11 +1,12 @@
 import datetime
 import os
-from typing import Literal, Optional
+from typing import Optional
 
 import discord
 from discord.ext import commands, tasks
 
-from module.Area import Area
+from module.area import Area
+from module.weathercodeconverter import WetherCodeConverter
 
 
 class WeatherCog(commands.Cog):
@@ -20,8 +21,8 @@ class WeatherCog(commands.Cog):
         self.notify_channel: Optional[discord.TextChannel] = None
 
         self.areas: list[Area] = [
-            Area(360000, 360010, 71106),  # 徳島県
-            Area(280000, 280010, 63518),
+            Area("徳島県", 34.0667, 134.5594),  # 徳島県
+            Area("兵庫県", 34.6913, 135.1830),  # 兵庫県
         ]
 
     @commands.Cog.listener()
@@ -42,30 +43,39 @@ class WeatherCog(commands.Cog):
                 self.tomorrow_forecast.start()
 
             print("Weather forecast loops started.")
+            await self.forecast_notify(self.notify_channel, datetime.datetime.now())
+            
         else:
             self.notify_channel = None
             print("Notify channel is not found or is not a text channel.")
 
-    async def forecast_notify(self, channel: discord.TextChannel, day: Literal["今日", "明日"]):
+    async def forecast_notify(self, channel: discord.TextChannel, day: datetime.datetime):
         embed = discord.Embed(
-            title=f"{day}の天気予報",
+            title=f"{day.strftime('%m-%d')}の天気予報",
             url="https://www.jma.go.jp/bosai/#pattern=forecast",
             colour=0x00B0F4,
             timestamp=datetime.datetime.now(),
         )
 
         for area in self.areas:
-            await area.get_forecast(day)
+            forecast = await area.get_forecast(day)
+            if forecast is None:
+                print(f"Failed to get forecast for {area.name} on {day}.")
+                continue
+
+            weather_code = int(forecast["weather_code"])
+            weather_text = WetherCodeConverter.convert(weather_code)
             embed.add_field(
-                name=await area.local_name(),
-                value=f"天気: {area.weather}\n"
-                f"最高気温: {area.temp_max} ℃\n"
-                f"最低気温: {area.temp_min} ℃\n"
-                f"降水確率: {area.pop} %",
+                name=area.name,
+                value=
+                f"天気: {weather_text} \n"
+                f"最高気温: {forecast['temperature_max']:.1f} ℃\n"
+                f"最低気温: {forecast['temperature_min']:.1f} ℃\n"
+                f"降水確率: {forecast['precipitation_probability_max']} %",
                 inline=True,
             )
-
-        embed.set_footer(text="気象庁提供")
+        
+        embed.set_footer(text=f"{datetime.datetime.now().strftime('%m-%d %H:%M')}時点")
         await channel.send(embed=embed)
 
     @tasks.loop(
@@ -78,7 +88,7 @@ class WeatherCog(commands.Cog):
     )
     async def today_forecast(self):
         if self.notify_channel is not None:
-            await self.forecast_notify(self.notify_channel, "今日")
+            await self.forecast_notify(self.notify_channel, datetime.datetime.today())
 
     @tasks.loop(
         time=datetime.time(
@@ -90,7 +100,7 @@ class WeatherCog(commands.Cog):
     )
     async def tomorrow_forecast(self):
         if self.notify_channel is not None:
-            await self.forecast_notify(self.notify_channel, "明日")
+            await self.forecast_notify(self.notify_channel, datetime.datetime.now() + datetime.timedelta(days=1))
 
 
 async def setup(bot: commands.Bot):
