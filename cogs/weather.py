@@ -81,7 +81,7 @@ class WeatherCog(commands.Cog):
     @tasks.loop(
         time=datetime.time(
             hour=6,
-            minute=0,
+            minute=3,
             second=0,
             tzinfo=datetime.timezone(datetime.timedelta(hours=+9), "JST"),
         )
@@ -93,7 +93,7 @@ class WeatherCog(commands.Cog):
     @tasks.loop(
         time=datetime.time(
             hour=18,
-            minute=0,
+            minute=3,
             second=0,
             tzinfo=datetime.timezone(datetime.timedelta(hours=+9), "JST"),
         )
